@@ -1204,3 +1204,11 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+// Debug GET handler to verify route deployment
+export async function GET() {
+  return new Response("API route is working!", {
+    status: 200,
+    headers: corsHeaders(),
+  });
+}
