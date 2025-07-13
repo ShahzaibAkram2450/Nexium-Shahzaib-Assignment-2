@@ -1037,6 +1037,17 @@ function calculateReadTime(wordCount: number): number {
 }
 
 export async function POST(request: NextRequest) {
+  // Handle CORS preflight
+  if (request.method === "OPTIONS") {
+    return new NextResponse(null, {
+      status: 204,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type",
+      },
+    });
+  }
   try {
     const { url } = await request.json();
     if (!url) {
@@ -1082,26 +1093,50 @@ export async function POST(request: NextRequest) {
       wordCount,
       readTime,
     };
-    return NextResponse.json(processedBlog);
+    return new NextResponse(JSON.stringify(processedBlog), {
+      status: 200,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+      },
+    });
   } catch (error) {
     console.error("Error processing blog:", error);
     if (axios.isAxiosError(error)) {
       if (error.code === "ENOTFOUND" || error.code === "ECONNREFUSED") {
-        return NextResponse.json(
-          { error: "Could not connect to the website. Please check the URL." },
-          { status: 400 }
+        return new NextResponse(
+          JSON.stringify({
+            error: "Could not connect to the website. Please check the URL.",
+          }),
+          {
+            status: 400,
+            headers: {
+              "Access-Control-Allow-Origin": "*",
+            },
+          }
         );
       }
       if (error.response?.status === 404) {
-        return NextResponse.json(
-          { error: "The webpage was not found (404)." },
-          { status: 400 }
+        return new NextResponse(
+          JSON.stringify({ error: "The webpage was not found (404)." }),
+          {
+            status: 400,
+            headers: {
+              "Access-Control-Allow-Origin": "*",
+            },
+          }
         );
       }
     }
-    return NextResponse.json(
-      { error: "Failed to process the blog. Please try again." },
-      { status: 500 }
+    return new NextResponse(
+      JSON.stringify({
+        error: "Failed to process the blog. Please try again.",
+      }),
+      {
+        status: 500,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+        },
+      }
     );
   }
 }
